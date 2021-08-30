@@ -1,37 +1,10 @@
 import discord
 from discord.ext import commands
 from private.config import token
-# from private.config import ROLE_CH
-# from private.config import TEST_CH
-# from private.config import ADMIN_ROLE_ID
 from private.config import reaction_roles
 
-import logging
-# import traceback
 import sys
 import datetime
-
-logging.getLogger("asyncio").setLevel(logging.DEBUG)
-
-"""
-Format:
-reaction_roles = {
-    messageId: [
-        (emoji, roleId),
-        (emoji, roleId)
-    ],
-    messageId: [
-        (emoji, roleId)
-    ]
-}
-"""
-reaction_roles = {
-    880463045162303489: [ # test server
-        (880463045162303489, 760831875899064360) # red circle, red
-        (880463045162303489, 760831928806408202) # blue circle, blue
-        (880463045162303489, )
-    ]
-}
 
 
 class LuckyBot(commands.Bot):
@@ -43,9 +16,6 @@ class LuckyBot(commands.Bot):
         print(error)
         await ctx.send("I'm sorry, that didn't work. See ``!help`` for more info on this bot.")
 
-
-# class CustomHelpCommand(commands.DefaultHelpCommand):
-#     self.no_category = "Available commands:"
 
 class TempChannels(commands.Cog):
 
@@ -164,31 +134,59 @@ class ReactionRoles(commands.Cog, name="Roles"):
     async def process_reaction(self, payload: discord.RawReactionActionEvent, reaction_type=None):
         if payload.message_id in reaction_roles.keys():
             for role_entry in reaction_roles[payload.message_id]:
-                if role_entry[0] == payload.emoji.id:
+                if role_entry[0] == payload.emoji.name:
                     guild = self.bot.get_guild(payload.guild_id)
                     user = await guild.fetch_member(payload.user_id)
                     role = guild.get_role(role_entry[1])
                     if role is None:
                         print(f"An invalid role ID ({role_entry[0]}, {role_entry[1]}) was provided for"
-                              f" message with ID: {payload.message_id}.")
+                              f" message with ID: {payload.message_id}.")                 
                     elif reaction_type == "add":
-                        await user.add_roles(role)
+                        if role in user.roles:
+                            await user.send("You already have that role. Remove your reaction to remove it.")                 
+                        else:
+                            try: 
+                                await user.add_roles(role)
+                                await user.send(
+                                    f"I've assigned you the {role.name} role. You'll be pinged for FC events "
+                                    + "and other content. See you soon!")
+                            except discord.Forbidden:
+                                print("Bot does not have permissions to add this role.")
+                            except discord.HTTPException:
+                                print("HTTPException: adding roles failed.")
                     elif reaction_type == "remove":
-                        await user.remove_roles(role)
+                        try: 
+                            await user.remove_roles(role)
+                            await user.send(
+                                    f"I've removed the {role.name} role. You won't be pinged for FC events, "
+                                    + "but will still be able to check the #exile-fc-schedule channel for announcements.")
+                        except discord.Forbidden:
+                            print("Bot does not have permissions to remove or manage this role.")
+                        except discord.HTTPException:
+                            print("HTTPException: removing role failed.")
                     else:
                         print("Invalid reaction type was provided in `process_reaction`.")
-                    break
+                    break               
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
         await self.process_reaction(payload, "add")
+        # print("reaction add event.")
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
         await self.process_reaction(payload, "remove")
 
+    @commands.Cog.listener()
+    async def emojis(self, ctx):
+        for emoji in ctx.guild.emojis:
+            print(emoji.name, emoji.id) 
 
-bot = LuckyBot(command_prefix='!')
+
+intents = discord.Intents.default()
+intents.reactions = True
+
+bot = LuckyBot(command_prefix='!', intents=intents)
 bot.add_cog(TempChannels(bot))
 bot.add_cog(ReactionRoles(bot))
 
