@@ -1,5 +1,3 @@
-fflog_id = "944d52cf-5aeb-4ee5-a142-e730ad63e975"
-fflog_secret = "NRksTzApDJrGTrvpAECLbVVIWMIprHKQzmfxlzsA"
 redirect_uri = "http://localhost:8080"
 
 import re
@@ -9,7 +7,10 @@ from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2 import BackendApplicationClient
 from requests.auth import HTTPBasicAuth
 from urllib.parse import urlparse
-import re
+
+from private.config import fflog_id
+from private.config import fflog_secret
+
 # from oauthlib.oauth2 import WebApplicationClient
 # from flask import Flask, request, redirect, session
 
