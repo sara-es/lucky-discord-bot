@@ -16,7 +16,11 @@ intents = discord.Intents.default()
 intents.reactions = True
 
 bot = LuckyBot(command_prefix='!', intents=intents)
-initial_extensions = ['cogs.tempchannels', 'cogs.reactionroles', 'cogs.ffcards']
+initial_extensions = [
+    'cogs.tempchannels', 
+    'cogs.reactionroles', 
+    'cogs.ffcards', 
+    'cogs.frcards',]
 
 # Here we load our extensions(cogs) listed above in [initial_extensions].
 if __name__ == '__main__':
