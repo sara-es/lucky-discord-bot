@@ -96,9 +96,20 @@ class JobQuiz(commands.Cog):
             type_nb = self.sum_digits(self.users[ctx.author.id])
             print(type_nb)
             # print(self.jobs)
-            await ctx.author.send(self.jobs[type_nb][1])
+            # await ctx.author.send(f"You got: {self.jobs[type_nb][0]}!")
+            await ctx.author.send(f"You got: {self.jobs[type_nb][0]}! {self.jobs[type_nb][1]}")
 
-                
+    @commands.command(name="quizresult")
+    async def quiz_result(self, ctx):
+        if ctx.author.id in self.users:    
+            if None not in self.users[ctx.author.id]:
+                type_nb = self.sum_digits(self.users[ctx.author.id])
+                await ctx.reply(f"You got: {self.jobs[type_nb][0]}! {self.jobs[type_nb][1]}") 
+            else: 
+                await ctx.reply("Something went wrong... did you finish the quiz?")
+        else:
+            await ctx.reply("Please take the quiz first! Send me ``!startquiz`` to start. (Or... complain at Niru if you broke me.)")
+        
 
         # await ctx.author.send(q)
 
