@@ -20,7 +20,8 @@ initial_extensions = [
     'cogs.tempchannels', 
     'cogs.reactionroles', 
     'cogs.ffcards', 
-    'cogs.frcards',]
+    'cogs.frcards',
+    'cogs.jobquiz',]
 
 # Here we load our extensions(cogs) listed above in [initial_extensions].
 if __name__ == '__main__':
