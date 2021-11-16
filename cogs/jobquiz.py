@@ -1,6 +1,6 @@
 from discord.ext import commands
 # from discord import Embed
-from discord import RawReactionActionEvent
+from discord import RawReactionActionEvent, File, Embed
 import asyncio
 import csv
 import os 
@@ -15,6 +15,7 @@ class JobQuiz(commands.Cog):
         self.emojis = ['0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'] #'<:fellcleave:886051923977994260>'
         self.users = {}
         self.CSV_PATH = os.path.join(os.getcwd(), "personalitytypes.csv")
+        self.IMG_PATH = os.path.join(os.getcwd(), "images//")
         
         with open(self.CSV_PATH, 'r', newline='') as f:
             self.jobs = list(csv.reader(f))
@@ -56,7 +57,22 @@ class JobQuiz(commands.Cog):
             print("User ID not found.")
             return False
     
-    # def calculate_result(self):
+    async def display_result(self, ctx, type_nb):
+        embed=Embed(
+            title=f"You got: {self.jobs[type_nb][0]}!", 
+        )
+
+        if type_nb == 2: #for WAR
+            img_name = self.IMG_PATH + self.jobs[type_nb][0] + ".gif"
+            filename = self.jobs[type_nb][0] + ".gif"
+        else:
+            img_name = self.IMG_PATH + self.jobs[type_nb][0] + ".png"
+            filename = self.jobs[type_nb][0] + ".png"
+        
+        file = File(img_name, filename=filename)
+        url = "attachment://" + filename
+        embed.set_image(url=url)
+        await ctx.reply(file=file, embed=embed)
 
     @commands.command(name="startquiz", aliases=["jobquiz", "quiz"])
     async def job_quiz(self, ctx):
@@ -70,8 +86,8 @@ class JobQuiz(commands.Cog):
         # add user to dictionary, with empty array which we will populate with responses
         self.users[ctx.author.id] = [None]*5
 
-        await ctx.author.send("Hi, welcome to the job quiz! This is just for fun!")
-        await ctx.author.send("I'm going to ask five questions. Please choose a number "+
+        await ctx.author.send("Hi, welcome to the job quiz! This is just for fun! \n" + 
+                              "I'm going to ask five questions. Please choose a number "+
                               "between 0 (I strongly disagree with this statement) and 5 (I strongly " +
                               "agree with this statement).")
         await ctx.author.send("(Please also be nice to the bot, and wait " +
@@ -95,16 +111,41 @@ class JobQuiz(commands.Cog):
         if None not in self.users[ctx.author.id]:
             type_nb = self.sum_digits(self.users[ctx.author.id])
             print(type_nb)
-            # print(self.jobs)
-            # await ctx.author.send(f"You got: {self.jobs[type_nb][0]}!")
-            await ctx.author.send(f"You got: {self.jobs[type_nb][0]}! {self.jobs[type_nb][1]}")
+            await self.display_result(ctx, type_nb)
 
     @commands.command(name="quizresult")
     async def quiz_result(self, ctx):
-        if ctx.author.id in self.users:    
+
+        # test = False
+        # if test:
+        #     embed=Embed(
+        #         title=f"You got: {self.jobs[2][0]}!", 
+        #         # description=self.jobs[type_nb][1]
+        #     )
+        #     img_name = self.IMG_PATH + self.jobs[2][0] + ".gif"
+        #     filename = self.jobs[2][0] + ".gif"
+        #     file = File(img_name, filename=filename)
+        #     url = "attachment://" + filename
+        #     embed.set_image(url=url)
+        #     await ctx.reply(file=file, embed=embed)
+
+        #     embed=Embed(
+        #         title=f"You got: {self.jobs[12][0]}!", 
+        #         # description=self.jobs[type_nb][1]
+        #     )
+        #     img_name = self.IMG_PATH + self.jobs[12][0] + ".png"
+        #     filename = self.jobs[12][0] + ".png"
+        #     file = File(img_name, filename=filename)
+        #     url = "attachment://" + filename
+        #     embed.set_image(url=url)
+        #     await ctx.reply(file=file, embed=embed)
+
+        #     return 1
+
+        if ctx.author.id in self.users:         
             if None not in self.users[ctx.author.id]:
                 type_nb = self.sum_digits(self.users[ctx.author.id])
-                await ctx.reply(f"You got: {self.jobs[type_nb][0]}! {self.jobs[type_nb][1]}") 
+                await self.display_result(ctx, type_nb)
             else: 
                 await ctx.reply("Something went wrong... did you finish the quiz?")
         else:
