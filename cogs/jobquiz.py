@@ -57,9 +57,10 @@ class JobQuiz(commands.Cog):
             print("User ID not found.")
             return False
     
-    async def display_result(self, ctx, type_nb):
+    def display_result(self, type_nb):
         embed=Embed(
             title=f"You got: {self.jobs[type_nb][0]}!", 
+            url = self.jobs[type_nb][1]
         )
 
         if type_nb == 2: #for WAR
@@ -70,9 +71,9 @@ class JobQuiz(commands.Cog):
             filename = self.jobs[type_nb][0] + ".png"
         
         file = File(img_name, filename=filename)
-        url = "attachment://" + filename
-        embed.set_image(url=url)
-        await ctx.reply(file=file, embed=embed)
+        img_url = "attachment://" + filename
+        embed.set_image(url=img_url)
+        return file, embed
 
     @commands.command(name="startquiz", aliases=["jobquiz", "quiz"])
     async def job_quiz(self, ctx):
@@ -111,7 +112,8 @@ class JobQuiz(commands.Cog):
         if None not in self.users[ctx.author.id]:
             type_nb = self.sum_digits(self.users[ctx.author.id])
             print(type_nb)
-            await self.display_result(ctx, type_nb)
+            file, embed = self.display_result(type_nb)
+            await ctx.author.send(file=file, embed=embed)
 
     @commands.command(name="quizresult")
     async def quiz_result(self, ctx):
@@ -145,7 +147,8 @@ class JobQuiz(commands.Cog):
         if ctx.author.id in self.users:         
             if None not in self.users[ctx.author.id]:
                 type_nb = self.sum_digits(self.users[ctx.author.id])
-                await self.display_result(ctx, type_nb)
+                file, embed = self.display_result(type_nb)
+                await ctx.reply(file=file, embed=embed)
             else: 
                 await ctx.reply("Something went wrong... did you finish the quiz?")
         else:
