@@ -63,10 +63,10 @@ class JobQuiz(commands.Cog):
         )
 
         if type_nb == 2: #for WAR
-            img_name = self.IMG_PATH + self.jobs[type_nb][0] + ".gif"
+            img_name = self.IMG_PATH + self.jobs[type_nb][0].lower() + ".gif"
             filename = self.jobs[type_nb][0] + ".gif"
         else:
-            img_name = self.IMG_PATH + self.jobs[type_nb][0] + ".png"
+            img_name = self.IMG_PATH + self.jobs[type_nb][0].lower() + ".png"
             filename = self.jobs[type_nb][0] + ".png"
         
         file = File(img_name, filename=filename)
