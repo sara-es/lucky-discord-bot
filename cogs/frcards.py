@@ -30,6 +30,7 @@ class FashionReportCard(commands.Cog):
                           headers=api_call_headers, )    #payload=payload
         
         if data.status_code != 200:
+            print(data.status_code)
             print(data.reason)
             return None
         
@@ -66,7 +67,7 @@ class FashionReportCard(commands.Cog):
 
     @commands.command(name="fashionreport", aliases=['fr'])
     async def get_fr(self, ctx):
-        data = self.callback("tweets/search/recent?query=(fashion report full) has:images from:KaiyokoStar -is:retweet&expansions=attachments.media_keys&media.fields=url&tweet.fields=created_at")
+        data = self.callback("tweets/search/recent?query=(fashion report week) has:images from:KaiyokoStar -is:retweet&expansions=attachments.media_keys&media.fields=url&tweet.fields=created_at")
         """Example return: 
         {
             "data": [
@@ -97,11 +98,15 @@ class FashionReportCard(commands.Cog):
         }
         """
         time_to_next_reset = self.get_next_reset()
+        # print(data)
 
         if data is None:
             await ctx.reply("Error requesting data from Twitter.")
+        else: jdata = data.json()
+        if jdata["meta"]["result_count"] == 0:
+            await ctx.reply("I can't find this week's fashion report, sorry! :(")
         else:
-            jdata = data.json()
+            # jdata = data.json()
             # print(jdata)
             post_time = jdata['data'][0]['created_at']
             last_tuesday_reset = datetime.date.today() + relativedelta(weekday=TU(-1))
