@@ -2,3 +2,6 @@ C:\Users\Sara\Documents\VS code\lucky-discord-bot\private\config.py
 /home/pi/lucky-discord-bot/private/config.py
 private/config.py
 private/__pycache__/config.cpython-38.pyc
+*.xml
+*.pyc
+*.pyc

@@ -23,7 +23,7 @@ credentials = {fflog_id : fflog_secret}
 authorization_base_url = 'https://fflogs.com/oauth/authorize'
 token_url = 'https://www.fflogs.com/oauth/token'
 # response = requests.post(url, data = grant_type=client_credentials, auth = credentials)
-data = {
+auth_data = {
     'client_id': fflog_id,
     'client_secret': fflog_secret,
     'grant_type': 'authorization_code',
@@ -142,7 +142,6 @@ class FFCards(commands.Cog):
                 return    
         
         jdata = data.json()
-        # reply_text = ""
 
         icons = {
             # "Warrior" : "<:Warrior_Icon_1:883379748997324890>",
@@ -166,21 +165,35 @@ class FFCards(commands.Cog):
             "Samurai" : "<:40pxSamurai_Icon_8:883379748997304320>",
         }
 
-        # get the last cleared
+        # get the last cleared if multiple fights
         data_path = jdata['data']['reportData']['report']['rankings']['data'][-1]
+        
+        
         encounter_name = data_path['encounter']['name']
-        # reply_text += f"Last fight logged: {encounter_name} \n"
-        # if data_path["difficulty"] == "101":
-        #     encounter_name += " (Savage)"
-        # for role in data_path['roles']:
-        #     # print(role)
-        #     for character in data_path["roles"][role]["characters"]:
-        #         if character["class"] in icons:
-        #             reply_text += f"**{character['rankPercent']}** {icons[character['class']]:<4}    {character['name']} \n"
-        #         else:
-        #             reply_text += f"     **{character['rankPercent']}**    {character['name']} ({character['class']}) \n"
-        # await message.channel.send(reply_text)
+        if data_path["difficulty"] == "101":
+            encounter_name += " (Savage)"
+        if data_path["difficulty"] == "100":
+            encounter_name += " (Extreme)"
+            
+        """
+        # construct the reply text
+        reply_text = ""
+        reply_text += f"{encounter_name} \n"
+        reply_text += "Percentiles listed are rankings for this parse (how it will appear on your profile)."
 
+        for role in data_path['roles']:
+            # print(role)
+            for character in data_path["roles"][role]["characters"]:
+                # for some reason fflogs api combines healer and tank damage as a character entry, so make sure the
+                # character is unique by checking if they have a server
+                if "server" in character:
+                    if character["class"] in icons:
+                        reply_text += f"**{character['rankPercent']}** {icons[character['class']]:<4}    {character['name']} \n"
+                    else:
+                        reply_text += f"     **{character['rankPercent']}**    {character['name']} ({character['class']}) \n"
+        await message.channel.send(reply_text)
+        """
+        
         embed=discord.Embed(
             title=f"{encounter_name}", 
             url=url.geturl(),
@@ -190,7 +203,8 @@ class FFCards(commands.Cog):
         for role in data_path['roles']:
             # print(role)
             for character in data_path["roles"][role]["characters"]:
-                # for some reason fflogs api combines healer and tank damage as a character entry, so make sure the character has a server
+                # for some reason fflogs api combines healer and tank damage as a character entry, so make sure the
+                # character is unique by checking if they have a server
                 if "server" in character:
                     if character["class"] in icons:
                         embed.add_field(
@@ -207,6 +221,7 @@ class FFCards(commands.Cog):
                         )
                         # reply_text += f"     **{character['rankPercent']}**    {character['name']} ({character['class']}) \n"
         await message.channel.send(embed=embed)
+        
 
 def setup(bot):
     bot.add_cog(FFCards(bot))
